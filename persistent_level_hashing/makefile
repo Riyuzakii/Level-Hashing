@@ -1,8 +1,7 @@
 all: plevel
 
 plevel: test.o level_hashing.o hash.o pflush.o log.o
-	gcc -o plevel test.o level_hashing.o hash.o pflush.o log.o libnvmemul.so -lm
-
+	gcc -o plevel test.o level_hashing.o hash.o pflush.o log.o -lm
 hash.o: hash.c hash.h
 	gcc -c hash.c
 	

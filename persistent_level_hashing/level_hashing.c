@@ -106,7 +106,7 @@ level_hash *level_init(uint64_t level_size)
 level_hash *level_sensitive_init(uint64_t level_size)
 {
     // level_hash *level_sensitive = pmalloc(sizeof(level_hash));
-    level_hash *level = mmap(NULL,sizeof(level_hash), PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_PRIVATE|MAP_PERSISTENT|MAP_SENSITIVE, -1, 0);
+    level_hash *level_sensitive = mmap(NULL,sizeof(level_hash), PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_PRIVATE|MAP_PERSISTENT|MAP_SENSITIVE, -1, 0);
     if (!level_sensitive)
     {
         printf("The level hash table initialization fails:1\n");
@@ -119,8 +119,8 @@ level_hash *level_sensitive_init(uint64_t level_size)
     generate_seeds(level_sensitive);
     // level_sensitive->buckets[0] = pmalloc(pow(2, level_size)*sizeof(level_bucket));
     // level_sensitive->buckets[1] = pmalloc(pow(2, level_size - 1)*sizeof(level_bucket));
-    level->buckets[0] = mmap(NULL,pow(2, level_size)*sizeof(level_bucket), PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_PRIVATE|MAP_PERSISTENT|MAP_SENSITIVE, -1, 0);
-    level->buckets[1] = mmap(NULL,pow(2, level_size - 1)*sizeof(level_bucket), PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_PRIVATE|MAP_PERSISTENT|MAP_SENSITIVE, -1, 0);
+    level_sensitive->buckets[0] = mmap(NULL,pow(2, level_size)*sizeof(level_bucket), PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_PRIVATE|MAP_PERSISTENT|MAP_SENSITIVE, -1, 0);
+    level_sensitive->buckets[1] = mmap(NULL,pow(2, level_size - 1)*sizeof(level_bucket), PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_PRIVATE|MAP_PERSISTENT|MAP_SENSITIVE, -1, 0);
     level_sensitive->interim_level_buckets = NULL;
     level_sensitive->level_item_num[0] = 0;
     level_sensitive->level_item_num[1] = 0;
@@ -206,7 +206,7 @@ void level_expand(level_hash *level)
                         //asm_mfence();
                         insertSuccess = 1;
 			nvm_writes+=1;
-                        printf("PW ");
+                        //printf("PW ");
 			new_level_item_num ++;
                         break;
                     }
@@ -311,7 +311,7 @@ void level_sensitive_expand(level_hash *level)
                         pflush((uint64_t *)&level->interim_level_buckets[f_idx].token[j]);
                         asm_mfence();
 			nvm_sensitive_writes+=1;
-                        printf("SW ");
+                        //printf("SW ");
 			insertSuccess = 1;
                         new_level_item_num ++;
                         break;
@@ -328,7 +328,7 @@ void level_sensitive_expand(level_hash *level)
                         pflush((uint64_t *)&level->interim_level_buckets[s_idx].token[j]);
                         asm_mfence();
 			nvm_sensitive_writes+=1;
-                        printf("SW ");
+                        //printf("SW ");
 			insertSuccess = 1;
                         new_level_item_num ++;
                         break;
@@ -393,7 +393,7 @@ void level_shrink(level_hash *level)
 
     level->level_size --;
     // level_bucket *newBuckets = pmalloc(pow(2, level->level_size - 1)*sizeof(level_bucket));
-    level->interim_level_buckets = mmap(NULL,pow(2, level->level_size - 1)*sizeof(level_bucket), PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_PRIVATE|MAP_PERSISTENT, -1, 0);
+    level_bucket *newBuckets = mmap(NULL,pow(2, level->level_size - 1)*sizeof(level_bucket), PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_PRIVATE|MAP_PERSISTENT, -1, 0);
     level->interim_level_buckets = level->buckets[0];
     level->buckets[0] = level->buckets[1];
     level->buckets[1] = newBuckets;
@@ -452,7 +452,7 @@ void level_sensitive_shrink(level_hash *level)
 
     level->level_size --;
     // level_bucket *newBuckets = pmalloc(pow(2, level->level_size - 1)*sizeof(level_bucket));
-    level->interim_level_buckets = mmap(NULL,pow(2, level->level_size - 1)*sizeof(level_bucket), PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_PRIVATE|MAP_PERSISTENT|MAP_SENSITIVE, -1, 0);
+    level_bucket *newBuckets = mmap(NULL,pow(2, level->level_size - 1)*sizeof(level_bucket), PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_PRIVATE|MAP_PERSISTENT|MAP_SENSITIVE, -1, 0);
     
     level->interim_level_buckets = level->buckets[0];
     level->buckets[0] = level->buckets[1];
@@ -513,7 +513,7 @@ uint8_t* level_dynamic_query(level_hash *level, uint8_t *key)
                 if (level->buckets[i][f_idx].token[j] == 1&&strcmp(level->buckets[i][f_idx].slot[j].key, key) == 0)
                 {
                     nvm_reads+=1;
-		    printf("PR ");
+		    //printf("PR ");
 		    return level->buckets[i][f_idx].slot[j].value;
                 }
             }
@@ -521,7 +521,7 @@ uint8_t* level_dynamic_query(level_hash *level, uint8_t *key)
                 if (level->buckets[i][s_idx].token[j] == 1&&strcmp(level->buckets[i][s_idx].slot[j].key, key) == 0)
                 {
                     nvm_reads+=1;
-		    printf("PR ");
+		    //printf("PR ");
 		    return level->buckets[i][s_idx].slot[j].value;
                 }
             }
@@ -538,7 +538,7 @@ uint8_t* level_dynamic_query(level_hash *level, uint8_t *key)
                 if (level->buckets[i-1][f_idx].token[j] == 1&&strcmp(level->buckets[i-1][f_idx].slot[j].key, key) == 0)
                 {
                    nvm_reads+=1;
-		   printf("PR ");
+		   //printf("PR ");
 		   return level->buckets[i-1][f_idx].slot[j].value;
                 }
             }
@@ -546,7 +546,7 @@ uint8_t* level_dynamic_query(level_hash *level, uint8_t *key)
                 if (level->buckets[i-1][s_idx].token[j] == 1&&strcmp(level->buckets[i-1][s_idx].slot[j].key, key) == 0)
                 {
                     nvm_reads+=1;
-		    printf("PR ");
+		    //printf("PR ");
 		    return level->buckets[i-1][s_idx].slot[j].value;
                 }
             }
@@ -575,7 +575,7 @@ uint8_t* level_static_query(level_hash *level, uint8_t *key)
             if (level->buckets[i][f_idx].token[j] == 1&&strcmp(level->buckets[i][f_idx].slot[j].key, key) == 0)
             {
                 nvm_reads+=1;
-		printf("PR ");
+		//printf("PR ");
 		return level->buckets[i][f_idx].slot[j].value;
             }
         }
@@ -583,7 +583,7 @@ uint8_t* level_static_query(level_hash *level, uint8_t *key)
             if (level->buckets[i][s_idx].token[j] == 1&&strcmp(level->buckets[i][s_idx].slot[j].key, key) == 0)
             {
                 nvm_reads+=1;
-		printf("PR ");
+		//printf("PR ");
 		return level->buckets[i][s_idx].slot[j].value;
             }
         }
@@ -707,7 +707,7 @@ uint8_t level_update(level_hash *level, uint8_t *key, uint8_t *new_value)
                         //pflush((uint64_t *)&level->buckets[i][f_idx].token[j]);
                         //asm_mfence();
 			nvm_writes+=1;
-                        printf("PW ");
+                        //printf("PW ");
 			return 0;                        
                     }
                 }
@@ -736,7 +736,7 @@ uint8_t level_update(level_hash *level, uint8_t *key, uint8_t *new_value)
                         //pflush((uint64_t *)&level->buckets[i][s_idx].token[j]);
                         //asm_mfence();
 			nvm_writes+=1;
-                        printf("PW ");
+                        //printf("PW ");
 			return 0;                        
                     }
                 }
@@ -783,7 +783,7 @@ uint8_t level_sensitive_update(level_hash *level, uint8_t *key, uint8_t *new_val
                         pflush((uint64_t *)&level->buckets[i][f_idx].token[j]);
                         asm_mfence();
 			nvm_sensitive_writes+=1;
-                        printf("SW ");
+                        //printf("SW ");
 			return 0;                        
                     }
                 }
@@ -811,7 +811,7 @@ uint8_t level_sensitive_update(level_hash *level, uint8_t *key, uint8_t *new_val
                         pflush((uint64_t *)&level->buckets[i][s_idx].token[j]);
                         asm_mfence();
 			nvm_sensitive_writes+=1;
-                        printf("SW ");
+                        //printf("SW ");
 			return 0;                        
                     }
                 }
@@ -864,7 +864,7 @@ uint8_t level_insert(level_hash *level, uint8_t *key, uint8_t *value)
                 level->level_item_num[i] ++;
                 //asm_mfence();
 		nvm_writes+=1;
-                printf("PW ");
+                //printf("PW ");
 		return 0;
             }
             if (level->buckets[i][s_idx].token[j] == 0) 
@@ -880,7 +880,7 @@ uint8_t level_insert(level_hash *level, uint8_t *key, uint8_t *value)
                 level->level_item_num[i] ++;
                 //asm_mfence();
 		nvm_writes+=1;
-                printf("PW ");
+                //printf("PW ");
 		return 0;
             }
         }
@@ -918,7 +918,7 @@ uint8_t level_insert(level_hash *level, uint8_t *key, uint8_t *value)
             level->level_item_num[1] ++;
             //asm_mfence();
 	    nvm_writes+=1;
-            printf("PW ");
+            //printf("PW ");
 	    return 0;
         }
 
@@ -935,7 +935,7 @@ uint8_t level_insert(level_hash *level, uint8_t *key, uint8_t *value)
             level->level_item_num[1] ++;
             //asm_mfence();
 	    nvm_writes+=1;
-            printf("PW ");
+            //printf("PW ");
 	    return 0;
         }
     }
@@ -973,7 +973,7 @@ uint8_t level_sensitive_insert(level_hash *level, uint8_t *key, uint8_t *value)
                 level->level_item_num[i] ++;
                 asm_mfence();
 		nvm_sensitive_writes+=1;
-                printf("SW ");
+                //printf("SW ");
 		return 0;
             }
             if (level->buckets[i][s_idx].token[j] == 0) 
@@ -989,7 +989,7 @@ uint8_t level_sensitive_insert(level_hash *level, uint8_t *key, uint8_t *value)
                 level->level_item_num[i] ++;
                 asm_mfence();
 		nvm_sensitive_writes+=1;
-                printf("SW ");
+                //printf("SW ");
 		return 0;
             }
         }
@@ -1027,7 +1027,7 @@ uint8_t level_sensitive_insert(level_hash *level, uint8_t *key, uint8_t *value)
             level->level_item_num[1] ++;
             asm_mfence();
 	    nvm_sensitive_writes+=1;
-            printf("SW ");
+            //printf("SW ");
 	    return 0;
         }
 
@@ -1044,7 +1044,7 @@ uint8_t level_sensitive_insert(level_hash *level, uint8_t *key, uint8_t *value)
             level->level_item_num[1] ++;
             asm_mfence();
 	    nvm_sensitive_writes+=1;
-            printf("SW ");
+            //printf("SW ");
 	    return 0;
         }
     }
@@ -1093,7 +1093,7 @@ uint8_t try_movement(level_hash *level, uint64_t idx, uint64_t level_num, uint8_
                 //pflush((uint64_t *)&level->buckets[level_num][idx].token[j]);
                 //asm_mfence();
 		nvm_writes+=1;
-                printf("PW ");
+                //printf("PW ");
 		// The movement is finished and then the new item is inserted
 
                 memcpy(level->buckets[level_num][idx].slot[i].key, key, KEY_LEN);
@@ -1107,7 +1107,7 @@ uint8_t try_movement(level_hash *level, uint64_t idx, uint64_t level_num, uint8_
                 level->level_item_num[level_num] ++;
                 //asm_mfence();
                 nvm_writes+=1;
-                printf("PW ");
+                //printf("PW ");
 		return 0;
             }
         }       
@@ -1152,7 +1152,7 @@ uint8_t try_sensitive_movement(level_hash *level, uint64_t idx, uint64_t level_n
                 pflush((uint64_t *)&level->buckets[level_num][idx].token[j]);
                 asm_mfence();
 		nvm_sensitive_writes+=1;
-                printf("SW ");
+                //printf("SW ");
 		// The movement is finished and then the new item is inserted
 
                 memcpy(level->buckets[level_num][idx].slot[i].key, key, KEY_LEN);
@@ -1166,7 +1166,7 @@ uint8_t try_sensitive_movement(level_hash *level, uint64_t idx, uint64_t level_n
                 level->level_item_num[level_num] ++;
                 asm_mfence();
                 nvm_sensitive_writes+=1;
-		printf("SW ");
+		//printf("SW ");
                 return 0;
             }
         }       
@@ -1212,7 +1212,7 @@ int b2t_movement(level_hash *level, uint64_t idx)
                 //pflush((uint64_t *)&level->buckets[1][idx].token[i]);
                 //asm_mfence();
 		nvm_writes+=1;
-		printf("PW ");
+		//printf("PW ");
                 level->level_item_num[0] ++;
                 level->level_item_num[1] --;
                 return i;
@@ -1233,7 +1233,7 @@ int b2t_movement(level_hash *level, uint64_t idx)
                 //pflush((uint64_t *)&level->buckets[1][idx].token[i]);
                 //asm_mfence();
 		nvm_writes+=1;
-		printf("PW ");
+		//printf("PW ");
                 level->level_item_num[0] ++;
                 level->level_item_num[1] --;
                 return i;
@@ -1278,7 +1278,7 @@ int b2t_sensitive_movement(level_hash *level, uint64_t idx)
                 pflush((uint64_t *)&level->buckets[1][idx].token[i]);
                 asm_mfence();
 		nvm_sensitive_writes+=1;
-		printf("SW ");
+		//printf("SW ");
                 level->level_item_num[0] ++;
                 level->level_item_num[1] --;
                 return i;
@@ -1299,7 +1299,7 @@ int b2t_sensitive_movement(level_hash *level, uint64_t idx)
                 pflush((uint64_t *)&level->buckets[1][idx].token[i]);
                 asm_mfence();
 		nvm_sensitive_writes+=1;
-		printf("SW ");
+		//printf("SW ");
                 level->level_item_num[0] ++;
                 level->level_item_num[1] --;
                 return i;

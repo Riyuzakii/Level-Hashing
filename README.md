@@ -1,3 +1,6 @@
+This particular fork of the repository has been modified to work along with the nvm-mmap support added in this repository [NVModule](https://github.com/Riyuzakii/NVModule).
+
+
 
 # Level Hashing
 
