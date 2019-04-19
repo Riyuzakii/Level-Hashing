@@ -40,7 +40,11 @@ typedef struct level_hash {               // A Level hash table
 
 level_hash *level_init(uint64_t level_size);     
 
+level_hash *level_sensitive_init(uint64_t level_size);     
+
 uint8_t level_insert(level_hash *level, uint8_t *key, uint8_t *value);          
+
+uint8_t level_sensitive_insert(level_hash *level, uint8_t *key, uint8_t *value);          
 
 uint8_t* level_static_query(level_hash *level, uint8_t *key);
 
@@ -48,14 +52,26 @@ uint8_t* level_dynamic_query(level_hash *level, uint8_t *key);
 
 uint8_t level_delete(level_hash *level, uint8_t*key);
 
+uint8_t level_sensitive_delete(level_hash *level, uint8_t*key);
+
 uint8_t level_update(level_hash *level, uint8_t *key, uint8_t *new_value);
+
+uint8_t level_sensitive_update(level_hash *level, uint8_t *key, uint8_t *new_value);
 
 void level_expand(level_hash *level);
 
+void level_sensitive_expand(level_hash *level);
+
 void level_shrink(level_hash *level);
+
+void level_sensitive_shrink(level_hash *level);
 
 uint8_t try_movement(level_hash *level, uint64_t idx, uint64_t level_num, uint8_t *key, uint8_t *value);
 
+uint8_t try_sensitive_movement(level_hash *level, uint64_t idx, uint64_t level_num, uint8_t *key, uint8_t *value);
+
 int b2t_movement(level_hash *level, uint64_t idx);
+
+int b2t_sensitive_movement(level_hash *level, uint64_t idx);
 
 void level_destroy(level_hash *level);
