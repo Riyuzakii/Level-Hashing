@@ -5,9 +5,12 @@
 #include <time.h>
 #include <ctype.h>
 #include <math.h>
+#include<sys/mman.h>
 #include "pflush.h"
 // #include "/home/kparun/Documents/CS730/quartz/src/lib/pmalloc.h"   // path to pmalloc.h in Quartz
 
+#define MAP_PERSISTENT 0x200000
+#define MAP_SENSITIVE 0x400000
 #define KEY_LEN 16                        // The maximum length of a key
 #define VALUE_LEN 15                      // The maximum length of a value
 
