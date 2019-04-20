@@ -69,9 +69,31 @@ void pflush(uint64_t *addr)
     */
     uint64_t start;
     uint64_t stop;
-    start = asm_rdtscp();
-    asm_clflush(addr);  
-    stop = asm_rdtscp();
-    printf("CON: %d\n", con_method);
+    // asm_clflush(addr);  
+    
+    // printf("CON: %d\n", con_method);
+    if(con_method == 0){//SFENCE-FLUSH
+        start = asm_rdtscp();
+        asm volatile("sfence");
+        asm_clflush(addr);
+        stop = asm_rdtscp();
+    }
+    else if(con_method == 1){// MFENCE-FLUSH-MFENCE
+        start = asm_rdtscp();
+        asm volatile("mfence");
+        asm_clflush(addr);
+        asm volatile("mfence");
+        stop = asm_rdtscp();
+    }
+    else if(con_method == 2 || con_method == 3){
+        start = 0;
+        stop = 0;
+    }
+    else if(con_method == 4){ //FLUSH WITH WT-CACHE
+        start = asm_rdtscp();
+        asm_clflush(addr);
+        stop = asm_rdtscp();        
+    }
+
     emulate_latency_ns(global_write_latency_ns - cycles_to_ns(global_cpu_speed_mhz, stop-start));
 }

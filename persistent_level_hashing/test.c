@@ -7,11 +7,11 @@ int con_method = 0;
 */
 int main(int argc, char* argv[])                        
 {
-    int level_size = atoi(argv[1]);                     // INPUT: the number of addressable buckets is 2^level_size
-    int insert_num = atoi(argv[2]);                     // INPUT: the number of items to be inserted
-    int write_latency = atoi(argv[3]);                  // INPUT: the injected write latency
-    int sensitive_count = round(insert_num * atoi(argv[4])/100);
-    con_method = atoi(argv[5]);
+    int level_size = atoi(argv[1]);                                 // INPUT: the number of addressable buckets is 2^level_size
+    int insert_num = atoi(argv[2]);                                 // INPUT: the number of items to be inserted
+    int write_latency = atoi(argv[3]);                              // INPUT: the injected write latency
+    int sensitive_count = round(insert_num * atoi(argv[4])/100);    // INPUT: percentage sensitive memory
+    con_method = atoi(argv[5]);                                     // INPUT: consistency mechanism
 
     init_pflush(2000, write_latency);
     level_hash *level = level_init(level_size);
