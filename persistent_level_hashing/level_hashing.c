@@ -1,6 +1,6 @@
 #include "level_hashing.h"
 
-extern int con_method;
+// extern int con_method;
 /*
 Function: F_HASH()
         Compute the first hash value of a key-value item

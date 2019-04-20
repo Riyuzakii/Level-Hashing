@@ -1,7 +1,7 @@
 #include "level_hashing.h"
 #include <math.h>
 
-extern int con_method;
+int con_method = 0;
 /*  Test:
     This is a simple test example to test the creation, insertion, search, deletion, update in Level hashing
 */
