@@ -210,6 +210,7 @@ void level_expand(level_hash *level)
                         //printf("PW ");
 			new_level_item_num ++;
                         break;
+		    printf("iS value: %d\n", insertSuccess);
                     }
                     if (level->interim_level_buckets[s_idx].token[j] == 0)
                     {
@@ -226,9 +227,9 @@ void level_expand(level_hash *level)
 			nvm_writes+=1;
                         new_level_item_num ++;
                         break;
+			printf("bottom iS value: %d\n", insertSuccess);
                     }
                 }
-
                 if(!insertSuccess){
                     printf("The expanding fails: 3\n");
                     exit(1);                    
@@ -266,7 +267,7 @@ void level_sensitive_expand(level_hash *level)
 {
     if (!level)
     {
-        printf("The expanding fails: 1\n");
+        printf("The sensitive expanding fails: 1\n");
         exit(1);
     }
     level->resize_state = 1;
@@ -277,7 +278,7 @@ void level_sensitive_expand(level_hash *level)
     level->interim_level_buckets = mmap(NULL,level->addr_capacity*sizeof(level_bucket), PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_PRIVATE|MAP_PERSISTENT|MAP_SENSITIVE, -1, 0);
     
     if (!level->interim_level_buckets) {
-        printf("The expanding fails: 2\n");
+        printf("The sensitive expanding fails: 2\n");
         exit(1);
     }
     pflush((uint64_t *)&level->interim_level_buckets);
@@ -337,7 +338,7 @@ void level_sensitive_expand(level_hash *level)
                 }
 
                 if(!insertSuccess){
-                    printf("The expanding fails: 3\n");
+                    printf("The sensitive expanding fails: 3\n");
                     exit(1);                    
                 }
                 

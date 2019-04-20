@@ -71,7 +71,7 @@ void pflush(uint64_t *addr)
     uint64_t stop;
     // asm_clflush(addr);  
     
-    // printf("CON: %d\n", con_method);
+    //printf("CON: %d\n", con_method);
     if(con_method == 0){//SFENCE-FLUSH
         start = asm_rdtscp();
         asm volatile("sfence");
@@ -95,5 +95,8 @@ void pflush(uint64_t *addr)
         stop = asm_rdtscp();        
     }
 
-    emulate_latency_ns(global_write_latency_ns - cycles_to_ns(global_cpu_speed_mhz, stop-start));
+/*	start = asm_rdtscp();
+    asm_clflush(addr);  
+    stop = asm_rdtscp();
+  */  emulate_latency_ns(global_write_latency_ns - cycles_to_ns(global_cpu_speed_mhz, stop-start));
 }
