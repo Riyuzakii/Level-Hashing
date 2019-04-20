@@ -61,6 +61,7 @@ level_hash *level_init(uint64_t level_size)
 {
     // level_hash *level = pmalloc(sizeof(level_hash));
     level_hash *level = mmap(NULL,sizeof(level_hash), PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_PRIVATE|MAP_PERSISTENT, -1, 0);
+    memset(level, 0, sizeof(level_hash));
     if (!level)
     {
         printf("The level hash table initialization fails:1\n");
@@ -75,7 +76,10 @@ level_hash *level_init(uint64_t level_size)
     // level->buckets[1] = pmalloc(pow(2, level_size - 1)*sizeof(level_bucket));
     // Allocating memory only with persistent flag because the allocation is from the NVM
     level->buckets[0] = mmap(NULL,pow(2, level_size)*sizeof(level_bucket), PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_PRIVATE|MAP_PERSISTENT, -1, 0);
+    memset(level->buckets, 0, pow(2, level_size)*sizeof(level_bucket));
+    // memset(level, 0, );
     level->buckets[1] = mmap(NULL,pow(2, level_size - 1)*sizeof(level_bucket), PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_PRIVATE|MAP_PERSISTENT, -1, 0);
+    memset(level->buckets, 0, pow(2, level_size - 1)*sizeof(level_bucket));
     level->interim_level_buckets = NULL;
     level->level_item_num[0] = 0;
     level->level_item_num[1] = 0;
@@ -108,6 +112,7 @@ level_hash *level_sensitive_init(uint64_t level_size)
 {
     // level_hash *level_sensitive = pmalloc(sizeof(level_hash));
     level_hash *level_sensitive = mmap(NULL,sizeof(level_hash), PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_PRIVATE|MAP_PERSISTENT|MAP_SENSITIVE, -1, 0);
+    memset(level_sensitive, 0, sizeof(level_hash));
     if (!level_sensitive)
     {
         printf("The level hash table initialization fails:1\n");
@@ -121,7 +126,9 @@ level_hash *level_sensitive_init(uint64_t level_size)
     // level_sensitive->buckets[0] = pmalloc(pow(2, level_size)*sizeof(level_bucket));
     // level_sensitive->buckets[1] = pmalloc(pow(2, level_size - 1)*sizeof(level_bucket));
     level_sensitive->buckets[0] = mmap(NULL,pow(2, level_size)*sizeof(level_bucket), PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_PRIVATE|MAP_PERSISTENT|MAP_SENSITIVE, -1, 0);
+    memset(level_sensitive->buckets, 0, pow(2, level_size)*sizeof(level_bucket));
     level_sensitive->buckets[1] = mmap(NULL,pow(2, level_size - 1)*sizeof(level_bucket), PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_PRIVATE|MAP_PERSISTENT|MAP_SENSITIVE, -1, 0);
+    memset(level_sensitive->buckets, 0, pow(2, level_size - 1)*sizeof(level_bucket));
     level_sensitive->interim_level_buckets = NULL;
     level_sensitive->level_item_num[0] = 0;
     level_sensitive->level_item_num[1] = 0;
@@ -170,6 +177,8 @@ void level_expand(level_hash *level)
     level->addr_capacity = pow(2, level->level_size + 1);
     // level->interim_level_buckets = pmalloc(level->addr_capacity*sizeof(level_bucket));
     level->interim_level_buckets = mmap(NULL,level->addr_capacity*sizeof(level_bucket), PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_PRIVATE|MAP_PERSISTENT, -1, 0);
+    memset(&level->interim_level_buckets, 0, level->addr_capacity*sizeof(level_bucket));
+
     if (!level->interim_level_buckets) {
         printf("The expanding fails: 2\n");
         exit(1);
@@ -276,6 +285,7 @@ void level_sensitive_expand(level_hash *level)
     level->addr_capacity = pow(2, level->level_size + 1);
     // level->interim_level_buckets = pmalloc(level->addr_capacity*sizeof(level_bucket));
     level->interim_level_buckets = mmap(NULL,level->addr_capacity*sizeof(level_bucket), PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_PRIVATE|MAP_PERSISTENT|MAP_SENSITIVE, -1, 0);
+    memset(&level->interim_level_buckets, 0, level->addr_capacity*sizeof(level_bucket));
     
     if (!level->interim_level_buckets) {
         printf("The sensitive expanding fails: 2\n");
@@ -396,6 +406,7 @@ void level_shrink(level_hash *level)
     level->level_size --;
     // level_bucket *newBuckets = pmalloc(pow(2, level->level_size - 1)*sizeof(level_bucket));
     level_bucket *newBuckets = mmap(NULL,pow(2, level->level_size - 1)*sizeof(level_bucket), PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_PRIVATE|MAP_PERSISTENT, -1, 0);
+    memset(newBuckets, 0, pow(2, level->level_size - 1)*sizeof(level_bucket));
     level->interim_level_buckets = level->buckets[0];
     level->buckets[0] = level->buckets[1];
     level->buckets[1] = newBuckets;
@@ -455,7 +466,7 @@ void level_sensitive_shrink(level_hash *level)
     level->level_size --;
     // level_bucket *newBuckets = pmalloc(pow(2, level->level_size - 1)*sizeof(level_bucket));
     level_bucket *newBuckets = mmap(NULL,pow(2, level->level_size - 1)*sizeof(level_bucket), PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_PRIVATE|MAP_PERSISTENT|MAP_SENSITIVE, -1, 0);
-    
+    memset(newBuckets, 0, pow(2, level->level_size - 1)*sizeof(level_bucket));
     level->interim_level_buckets = level->buckets[0];
     level->buckets[0] = level->buckets[1];
     level->buckets[1] = newBuckets;
