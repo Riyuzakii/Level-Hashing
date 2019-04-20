@@ -1,5 +1,5 @@
 #include "log.h"
-
+extern int con_method;
 /*
 Function: log_create() 
         Create a log;

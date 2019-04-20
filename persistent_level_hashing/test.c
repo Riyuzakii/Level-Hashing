@@ -1,6 +1,7 @@
 #include "level_hashing.h"
 #include <math.h>
 
+extern int con_method;
 /*  Test:
     This is a simple test example to test the creation, insertion, search, deletion, update in Level hashing
 */
@@ -10,7 +11,8 @@ int main(int argc, char* argv[])
     int insert_num = atoi(argv[2]);                     // INPUT: the number of items to be inserted
     int write_latency = atoi(argv[3]);                  // INPUT: the injected write latency
     int sensitive_count = round(insert_num * atoi(argv[4])/100);
-    
+    con_method = atoi(argv[5]);
+
     init_pflush(2000, write_latency);
     level_hash *level = level_init(level_size);
     level_hash *level_sensitive = level_sensitive_init(level_size);

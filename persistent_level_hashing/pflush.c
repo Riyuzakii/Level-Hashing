@@ -1,6 +1,7 @@
 #include "pflush.h"
 /* Note that we refered to the implementation code of pflush function in Quartz
 */
+extern int con_method;
 
 static inline unsigned long long asm_rdtsc(void)
 {
@@ -71,6 +72,6 @@ void pflush(uint64_t *addr)
     start = asm_rdtscp();
     asm_clflush(addr);  
     stop = asm_rdtscp();
-
+    printf("CON: %d\n", con_method);
     emulate_latency_ns(global_write_latency_ns - cycles_to_ns(global_cpu_speed_mhz, stop-start));
 }

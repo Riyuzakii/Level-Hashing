@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-
+int con_method = 0;
 /*  Cache line flush: 
     clflush can be replaced with clflushopt or clwb, if the CPU supports clflushopt or clwb.  
 */
